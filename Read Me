@@ -1,3 +1,19 @@
+This is my version of the AWS Cloud Resume Challenge: https://cloudresumechallenge.dev/docs/the-challenge/aws/ where we made a full stack website, going over many front end and
+back end technologies. You can use any of the following links: https://resume.trieuly.xyz/ | https://trieuly.xyz/ | https://www.trieuly.xyz/
+
+Some notable backend technologies that I personally used in this project are:
+route 53, terraform for IAAC, python for backend, s3 for buckets, Lambda for serverless, DynamoDB for database access, 
+CloudFront for a CDN to keep everything secure, Certificate Manager for linking the website to cloudfront, and lastly IAM to configure roles for everything needed in this project.
+
+Overall this was a great learning experience learning how everything syncs properly together, and getting more knowledge in the AWS infrastrcture as well. Going through many debugging
+processes while doing this challenge made it very frustrating at times, however very rewarding at the end when I successfully completed it. This overall was a very fun project, and 
+I will come back to it to complete the terraform IAAC for dynamodb, s3 buckets, etc... as I only implemented role access. That is when I get more terraform knowledge...
+
+
+
+Below is just all the problems that I personally ran into and how I solved it when going through this challenge.
+
+
 When trying to link my FQDN with the distribution name it was not linking properly. At first I just linked it and url forwarded it over to the AWS distribution name, however after looking at it properly. 
 You have to match the CNAME on Cloudfront with the A name record that you want to have on Route53. 
 
