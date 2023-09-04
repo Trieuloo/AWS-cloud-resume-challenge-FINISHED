@@ -1,0 +1,89 @@
+When trying to link my FQDN with the distribution name it was not linking properly. At first I just linked it and url forwarded it over to the AWS distribution name, however after looking at it properly. 
+You have to match the CNAME on Cloudfront with the A name record that you want to have on Route53. 
+
+When updating the S3 bucket the cloud front wasn't getting updated.
+amazon web services - AWS cloudfront not updating on update of files in S3 - Stack Overflow
+After doing some research it is because it doesnt pull from HTTPS and the benefit of cloud front / S3 bucket integration is more so due to the fact that its on the endpoint server for faster delivery. 
+
+Had trouble using different DNS’s to work instead of using URL forwarding to forward people from trieuly.xyz to Cloud Resume Challenge (d1lrdw2mln1cta.cloudfront.net). 
+What I ended up doing is changing my authoritative nameservers on the site i bought the website from, in this case porkbun.com. I got all the name servers to replace from route53 NS. 
+
+When pushing to github actions i had alot of troubles uploading the yml file correctly. The main issue was linking the s3 bucket properly and not knowing how to do it. 
+This is because when you input the secret key for the bucket I was not sure that it had to be the s3 name itself. I was putting in the settings keys and it was not working. 
+
+After I actually got that established, I faced another issue where it said: Unknown options: s3://***/. The reason that ended up happening is because i had my source dir established as           SOURCE_DIR: 'Website Template'
+In my yml file and i believe that the space? Was what was causing the problem. I renamed my test file into Website and changed my source_dir to Website as well then it worked.
+
+After I finished those problems I had another problem  fatal error: An error occurred (AccessDenied) when calling the ListObjectsV2 operation: Access Denied
+Where it looks like the access is denied when calling upon the object most likely this is something wrong with the IAM as it shows access denied. 
+This most likely was due to           args: --acl public-read --follow-symlinks --delete
+Being a public read when i set the whole bucket to private. I changed it to private read, after swapping it and it brought this issue back Unknown options: s3://***/ probably due to not having permissions. 
+I tried rechanging the sourcedir it didnt work. I then tried to change from public-read to private-read whichhad the same ACL issue which means its not fixed. 
+I changed the ACL for S3 log delivery group to see if it affects anything still shows. Still not working. I ended up deleting the  —acl public-read arg completely, however it still is having accessdenied.
+
+I changed some of the settings instead of blocking all public access to my bucket I made sure that things can go through my ACL that I just setup. After changing that another error popped up:
+delete failed: s3://***/Website Template/assets/css/fontawesome-all.min.css An error occurred (AccessDenied) when calling the DeleteObject operation: Access Denied
+13delete failed: s3://***/Website Template/assets/css/noscript.css An error occurred (AccessDenied) when calling the DeleteObject operation: Access Denied
+14delete failed: s3://***/Website Template/assets/sass/base/_typography.scss An error occurred (AccessDenied) when calling the DeleteObject operation: Access Denied
+I assigned myself admin policy on iam and then readded the access key / changed the access key in github to see if it worked. Still not working after trying many times.
+I just completely turned off block and deleted the public / private access to see if it works. 
+It still shows access denied. When deleting keys i forgot that i deleted the terraform key, redeployed to see if it worked. I cant tell what really triggered tihs problem. 
+Due to that I’m going to redeploy everything to make sure everything is correct.After retrying it still looked like it didnt work. I checked my IAM and deleted some policies to see if it was blocking the process.
+After hours of troubleshooting i came back to the same error: fatal error: An error occurred (InvalidAccessKeyId) when calling the ListObjectsV2 operation: The AWS Access Key Id you provided does not exist in our records.
+This was after i deleted all the IAM properties that I had set like admin access, alongside with policies.
+After relooking at the IAM for the admin role that I setup, I only gave administrator access however not the other two admin roles. After setting the other two admin roles i was successfully able to deploy github actions. 
+
+
+When trying to run a terraform init this popped up:
+
+terraform : The term 'terraform' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is 
+correct and try again.
+At line:1 char:1
++ terraform init
++ ~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (terraform:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+This was because i never installed terraform onto my computer before even though i had the VS code installation. I had to search up environmental variables then editing it, and including the path to the terraform file.
+
+
+When running a terraform plan / terraform apply to push everything it showed up an error. Looks like i need to add more roles to my IAM admin
+
+│ Error: creating IAM Role (iam_for_lambda): AccessDenied: User: arn:aws:iam::615674685436:user/Trieuly is not authorized to perform: iam:CreateRole on resource: arn:aws:iam::615674685436:role/iam_for_lambda with an explicit deny in an identity-based policy
+│       status code: 403, request id: 9b62a751-4522-4f42-a5d9-4210ded27e3d
+│
+│   with aws_iam_role.iam_for_lambda,
+│   on main.tf line 10, in resource "aws_iam_role" "iam_for_lambda":
+│   10: resource "aws_iam_role" "iam_for_lambda" {
+
+
+Ran this json code 
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iam:CreateRole",
+      "Resource": "*"
+    }
+  ]
+}
+
+To allow myself to create role, looks liek still didnt work. Gave my self full access to AWS lambda role still not working. So the reason it wasn’t working was because i needed to give myself full dynamodb access and after that.
+The reason that it wasnt working was cause i gave myself a basic user access to LAMBDA which overrid my admin access. By deleting many of the roles i didn’t need the code ran smoothly and terraform apply worked.
+
+At this point and time for some reason when I checked my visitor code in JS it was not fetching it from AWS properly.
+I had to make sure that I had the correct permissions however, it kept showing the error message that I put down instead of the visitor counter.
+I spent alot of time trying to look through my code testing different things, however it was just because i mispelled response, and after changing it all the properties fetched correctly.
+
+I was also having troubles from deploying my code from terraform straight to uploading the AWS functions. This happened because i ended up being in the wrong location. I had to match my location to the oregon - us-west-2 and reapply and it worked.
+
+
+I faced another problem when trying to automate my deployment of infrastructure with IAAC using terraform where it wasn’t actually deploying with the correct permissions that I set. 
+Therefore the automated deployment was not actually getting the viewer count and getting blocked by the ACL. 
+
+This is where I am going to stop the project for now as I don’t have enough terraform knowledge and am planning to expand on it then come back to complete the project with a full terraform IAAC deploying things like the dynamo table,
+correct role access, and s3. I also technically have not completed / remade a CI CD for github actions using secrets for backend, alongside with creating some python tests. 
+I plan to revisit the project in the future to finish it after I gain more knowledge, however it was a very fun project overall. 
