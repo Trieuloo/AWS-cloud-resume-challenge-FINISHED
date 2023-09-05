@@ -65,7 +65,7 @@ This was because i never installed terraform onto my computer before even though
 
 When running a terraform plan / terraform apply to push everything it showed up an error. Looks like i need to add more roles to my IAM admin
 
-│ Error: creating IAM Role (iam_for_lambda): AccessDenied: User: arn:aws:iam::615674685436:user/Trieuly is not authorized to perform: iam:CreateRole on resource: arn:aws:iam::615674685436:role/iam_for_lambda with an explicit deny in an identity-based policy
+│ Error: creating IAM Role (iam_for_lambda): AccessDenied: User: arn:aws:iam::Filler:user/Trieuly is not authorized to perform: iam:CreateRole on resource: arn:aws:iam::Filler:role/iam_for_lambda with an explicit deny in an identity-based policy
 │       status code: 403, request id: 9b62a751-4522-4f42-a5d9-4210ded27e3d
 │
 │   with aws_iam_role.iam_for_lambda,
